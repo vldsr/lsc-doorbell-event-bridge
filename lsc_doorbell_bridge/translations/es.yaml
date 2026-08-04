@@ -1,0 +1,49 @@
+configuration:
+  access_id:
+    name: Access ID
+    description: Access ID del proyecto Tuya Cloud.
+  access_secret:
+    name: Access Secret
+    description: Access Secret del proyecto Tuya Cloud. Manténgalo privado.
+  subscription_name:
+    name: Nombre de suscripción
+    description: Nombre exacto de la suscripción de producción de Tuya Message Service.
+  data_center:
+    name: Centro de datos
+    description: Centro de datos Tuya usado por el proyecto.
+  environment:
+    name: Entorno
+    description: Use producción para el funcionamiento normal.
+  devices:
+    name: Dispositivos de timbre
+    description: Asociación entre el timbre LSC y la cámara de Home Assistant.
+  event_hold_seconds:
+    name: Duración del evento
+    description: Segundos que Pressed y Motion permanecen activos.
+  dedupe_seconds:
+    name: Ventana de deduplicación
+    description: Segundos usados para combinar eventos duplicados.
+  snapshot_delay_seconds:
+    name: Retardo de captura
+    description: Espera después de un evento antes de la captura.
+  snapshot_timeout_seconds:
+    name: Tiempo límite de captura
+    description: Tiempo máximo permitido para una captura.
+  snapshot_on_press:
+    name: Captura al pulsar
+    description: Toma una foto al pulsar el timbre.
+  snapshot_on_motion:
+    name: Captura por movimiento
+    description: Toma una foto al detectar movimiento.
+  snapshot_periodic_enabled:
+    name: Capturas periódicas
+    description: Toma fotos automáticamente a intervalos regulares.
+  snapshot_refresh_minutes:
+    name: Intervalo periódico
+    description: Minutos entre capturas periódicas.
+  snapshot_retention_days:
+    name: Conservación de fotos
+    description: Días durante los que se guardan las capturas.
+  webui_language:
+    name: Idioma de la Web UI
+    description: Idioma de la interfaz Web integrada.

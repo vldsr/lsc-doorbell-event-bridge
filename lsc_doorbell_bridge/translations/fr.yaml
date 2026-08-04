@@ -1,0 +1,49 @@
+configuration:
+  access_id:
+    name: Access ID
+    description: Access ID du projet Tuya Cloud.
+  access_secret:
+    name: Access Secret
+    description: Access Secret du projet Tuya Cloud. Gardez-le privé.
+  subscription_name:
+    name: Nom de l’abonnement
+    description: Nom exact de l’abonnement de production Tuya Message Service.
+  data_center:
+    name: Centre de données
+    description: Centre de données Tuya utilisé par le projet.
+  environment:
+    name: Environnement
+    description: Utilisez production pour le fonctionnement normal.
+  devices:
+    name: Sonnette
+    description: Association entre la sonnette LSC et la caméra Home Assistant.
+  event_hold_seconds:
+    name: Durée de l’événement
+    description: Durée d’activation de Pressed et Motion.
+  dedupe_seconds:
+    name: Fenêtre de déduplication
+    description: Délai de fusion des notifications en double.
+  snapshot_delay_seconds:
+    name: Délai du snapshot
+    description: Attente après un événement avant la capture.
+  snapshot_timeout_seconds:
+    name: Délai maximal du snapshot
+    description: Temps maximal autorisé pour une capture.
+  snapshot_on_press:
+    name: Snapshot à l’appui
+    description: Prendre une photo lors de l’appui sur la sonnette.
+  snapshot_on_motion:
+    name: Snapshot au mouvement
+    description: Prendre une photo lors d’un mouvement.
+  snapshot_periodic_enabled:
+    name: Snapshots périodiques
+    description: Prendre automatiquement des photos à intervalle régulier.
+  snapshot_refresh_minutes:
+    name: Intervalle périodique
+    description: Minutes entre les snapshots périodiques.
+  snapshot_retention_days:
+    name: Conservation des photos
+    description: Nombre de jours de conservation des snapshots.
+  webui_language:
+    name: Langue de l’interface Web
+    description: Langue de l’interface Web intégrée.

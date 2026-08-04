@@ -1,0 +1,49 @@
+configuration:
+  access_id:
+    name: Access ID
+    description: Access ID of the Tuya Cloud project.
+  access_secret:
+    name: Access Secret
+    description: Access Secret of the Tuya Cloud project. Keep it private.
+  subscription_name:
+    name: Subscription name
+    description: Exact production subscription name from Tuya Message Service.
+  data_center:
+    name: Data center
+    description: Tuya data center used by the cloud project.
+  environment:
+    name: Environment
+    description: Use production for normal operation.
+  devices:
+    name: Doorbell devices
+    description: LSC doorbell and Home Assistant camera mapping.
+  event_hold_seconds:
+    name: Event hold time
+    description: Seconds that Pressed and Motion remain active.
+  dedupe_seconds:
+    name: Deduplication window
+    description: Seconds used to merge duplicate doorbell notifications.
+  snapshot_delay_seconds:
+    name: Snapshot delay
+    description: Seconds to wait after an event before taking a snapshot.
+  snapshot_timeout_seconds:
+    name: Snapshot timeout
+    description: Maximum time allowed for a snapshot request.
+  snapshot_on_press:
+    name: Snapshot on press
+    description: Take a snapshot when the doorbell button is pressed.
+  snapshot_on_motion:
+    name: Snapshot on motion
+    description: Take a snapshot when motion is detected.
+  snapshot_periodic_enabled:
+    name: Periodic snapshots
+    description: Take snapshots automatically at a fixed interval.
+  snapshot_refresh_minutes:
+    name: Periodic interval
+    description: Minutes between periodic snapshots.
+  snapshot_retention_days:
+    name: Photo retention
+    description: Days to keep archived snapshots.
+  webui_language:
+    name: Web UI language
+    description: Language used by the built-in Web UI.

@@ -1,0 +1,49 @@
+configuration:
+  access_id:
+    name: Access-ID
+    description: Access-ID des Tuya-Cloud-Projekts.
+  access_secret:
+    name: Access Secret
+    description: Access Secret des Tuya-Cloud-Projekts. Geheim halten.
+  subscription_name:
+    name: Abonnementname
+    description: Exakter Produktions-Abonnementname aus Tuya Message Service.
+  data_center:
+    name: Rechenzentrum
+    description: Vom Cloud-Projekt verwendetes Tuya-Rechenzentrum.
+  environment:
+    name: Umgebung
+    description: Für den normalen Betrieb Produktion verwenden.
+  devices:
+    name: Türklingelgeräte
+    description: Zuordnung von LSC-Türklingel und Home-Assistant-Kamera.
+  event_hold_seconds:
+    name: Ereignisdauer
+    description: Sekunden, die Pressed und Motion aktiv bleiben.
+  dedupe_seconds:
+    name: Deduplizierungsfenster
+    description: Sekunden zum Zusammenführen doppelter Ereignisse.
+  snapshot_delay_seconds:
+    name: Snapshot-Verzögerung
+    description: Wartezeit nach einem Ereignis vor dem Snapshot.
+  snapshot_timeout_seconds:
+    name: Snapshot-Zeitlimit
+    description: Maximale Dauer einer Snapshot-Anfrage.
+  snapshot_on_press:
+    name: Snapshot bei Tastendruck
+    description: Snapshot beim Drücken der Klingeltaste.
+  snapshot_on_motion:
+    name: Snapshot bei Bewegung
+    description: Snapshot bei erkannter Bewegung.
+  snapshot_periodic_enabled:
+    name: Periodische Snapshots
+    description: Snapshots automatisch in einem festen Intervall aufnehmen.
+  snapshot_refresh_minutes:
+    name: Periodisches Intervall
+    description: Minuten zwischen periodischen Snapshots.
+  snapshot_retention_days:
+    name: Fotoaufbewahrung
+    description: Tage, für die Snapshots gespeichert werden.
+  webui_language:
+    name: Web-UI-Sprache
+    description: Sprache der integrierten Weboberfläche.
