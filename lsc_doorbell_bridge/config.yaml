@@ -3,7 +3,7 @@ description: Tuya doorbell events with configurable snapshots, battery, power mo
 version: "1.0.0"
 slug: lsc_doorbell_bridge
 url: https://github.com/GiannBart/lsc-doorbell-event-bridge
-stage: experimental
+stage: stable
 startup: application
 boot: auto
 init: false
