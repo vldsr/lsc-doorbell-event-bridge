@@ -50,4 +50,3 @@ Many thanks to Jürgen for his work and for sharing it with the Home Assistant c
 - [Tuya Message Service](https://developer.tuya.com/en/docs/iot/manage-messages?id=Ka49p7loog3ze)
 - [Home Assistant App repositories](https://developers.home-assistant.io/docs/apps/repository/)
 - [Home Assistant local App testing](https://developers.home-assistant.io/docs/apps/testing/)
-````
