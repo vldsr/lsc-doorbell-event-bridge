@@ -215,7 +215,6 @@ https://github.com/GiannBart/lsc-doorbell-event-bridge
 4. Paste the repository URL.
 5. Save and refresh the App store.
 
-![Step 17 — Add the GitHub repository](images/17-home-assistant-add-repository.png)
 
 ## Step 17 — Install the App
 
@@ -225,7 +224,6 @@ https://github.com/GiannBart/lsc-doorbell-event-bridge
 4. Wait for the build and installation to finish.
 5. Enable **Start on boot** and **Watchdog** after the initial configuration is working.
 
-![Step 17 — Install LSC Doorbell Event Bridge](images/17-home-assistant-install-app.png)
 
 ## Step 17 — Open the Web UI
 
@@ -234,7 +232,6 @@ https://github.com/GiannBart/lsc-doorbell-event-bridge
 3. The Web UI opens in English by default.
 4. Use the language menu to switch the interface immediately to Italian, German, French, or Spanish.
 
-![Step 17 — Open the multilingual Web UI](images/17-bridge-web-ui.png)
 
 ## Step 17 — Enter the Tuya connection settings
 
@@ -251,7 +248,6 @@ Enter:
 
 Use the Web UI suggestions where available instead of manually typing Home Assistant entity IDs.
 
-![Step 17 — Tuya and Home Assistant device settings](images/17-bridge-connection-settings.png)
 
 ## Step 17 — Configure independent snapshot triggers
 
@@ -263,7 +259,6 @@ Each snapshot source has its own toggle:
 
 You can enable any combination of the three.
 
-![Step 17 — Snapshot trigger toggles](images/17-bridge-snapshot-toggles.png)
 
 ## Step 17 — Configure interval, delay, and retention
 
@@ -276,7 +271,6 @@ Set:
 
 Select **Save and restart App**.
 
-![Step 17 — Snapshot timing and retention settings](images/17-bridge-retention-settings.png)
 
 ---
 
@@ -294,7 +288,6 @@ Select **Save and restart App**.
    - Power mode
    - Battery
 
-![Step 17 — Home Assistant entities](images/17-home-assistant-entities.png)
 
 ## Step 24 — Verify the photo archive
 
@@ -306,7 +299,6 @@ Select **Save and restart App**.
 
 The archive retains all photographs until they exceed the configured retention period.
 
-![Step 24 — Photo archive and multi-select actions](images/24-bridge-photo-archive.png)
 
 ---
 
