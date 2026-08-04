@@ -23,10 +23,12 @@ https://github.com/GiannBart/lsc-doorbell-event-bridge
 Then install **LSC Doorbell Event Bridge** and open its Web UI.
 
 Read the illustrated, end-to-end setup guide: **[Complete installation guide](docs/INSTALLATION.md)**.
+# Credits and references
+
+- LSC Tuya Doorbell v2 — Home Assistant Integration: <https://github.com/jurgenmahn/ha_tuya_doorbell>
 
 # Official references
 
-- LSC Tuya Doorbell v2 — Home Assistant Integration: <https://github.com/jurgenmahn/ha_tuya_doorbell>
 - Home Assistant Tuya integration: <https://www.home-assistant.io/integrations/tuya/>
 - Tuya Smart Home project configuration: <https://developer.tuya.com/en/docs/iot/Platform_Configuration_smarthome?id=Kamcgamwoevrx>
 - Tuya Smart Home quick start: <https://developer.tuya.com/en/docs/iot/smart-home-quick-start?id=Kbvwrxn6mngbd>
