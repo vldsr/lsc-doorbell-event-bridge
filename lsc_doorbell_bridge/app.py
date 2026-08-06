@@ -293,6 +293,15 @@ class Bridge:
         self.snapshot_timers: dict[str, threading.Timer] = {}
         self.snapshot_lock = threading.Lock()
         self.periodic_stop = threading.Event()
+        # The periodic schedule is tracked only in RAM with a monotonic clock.
+        # Snapshot files under /data/snapshots are archive items only: deleting
+        # the newest file (or the whole archive) cannot alter this state.
+        self.periodic_state = threading.Condition()
+        self.periodic_interval = max(60.0, self.snapshot_refresh_minutes * 60.0)
+        now = time.monotonic()
+        self.last_snapshot_attempt_at: dict[str, float] = {
+            device_id: now - self.periodic_interval for device_id in self.devices
+        }
         self.media_generation: dict[str, int] = {}
         self.last_events: dict[tuple[str, str], float] = {}
         self.refresh_threads: list[threading.Thread] = []
@@ -302,6 +311,9 @@ class Bridge:
 
     def close(self) -> None:
         self.periodic_stop.set()
+        # Wake periodic workers that are sleeping on the in-memory condition.
+        with self.periodic_state:
+            self.periodic_state.notify_all()
         for thread in self.refresh_threads:
             thread.join(timeout=2)
         with self.snapshot_lock:
@@ -317,32 +329,53 @@ class Bridge:
         if not self.snapshot_periodic_enabled:
             LOGGER.info("Periodic snapshots are disabled")
             return
-        interval = max(60.0, self.snapshot_refresh_minutes * 60.0)
         LOGGER.info(
-            "Periodic snapshots enabled every %.2f minute(s); first capture starts immediately",
-            interval / 60.0,
+            "Periodic snapshots enabled every %.2f minute(s); "
+            "schedule state is RAM-only (archive files are ignored)",
+            self.periodic_interval / 60.0,
         )
         for device_id in self.devices:
             thread = threading.Thread(
                 target=self._periodic_refresh_loop,
-                args=(device_id, interval),
+                args=(device_id,),
                 daemon=True,
                 name=f"snapshot-refresh-{slugify(device_id)}",
             )
             self.refresh_threads.append(thread)
             thread.start()
 
-    def _periodic_refresh_loop(self, device_id: str, interval: float) -> None:
-        # Capture once at startup so a newly enabled periodic schedule can be
-        # verified immediately. Subsequent captures keep the configured gap.
+    def _remember_snapshot_attempt(self, device_id: str, when: float | None = None) -> None:
+        """Remember snapshot timing in RAM and wake the periodic scheduler."""
+        with self.periodic_state:
+            self.last_snapshot_attempt_at[device_id] = (
+                time.monotonic() if when is None else when
+            )
+            self.periodic_state.notify_all()
+
+    def _periodic_refresh_loop(self, device_id: str) -> None:
         while not STOP.is_set() and not self.periodic_stop.is_set():
+            with self.periodic_state:
+                last_attempt = self.last_snapshot_attempt_at[device_id]
+                due_at = last_attempt + self.periodic_interval
+                remaining = due_at - time.monotonic()
+
+                if remaining > 0:
+                    self.periodic_state.wait(timeout=remaining)
+                    continue
+
+                # Reserve the next interval before submitting the capture. This
+                # prevents rapid retries if the camera is asleep or unavailable.
+                tick_at = time.monotonic()
+                self.last_snapshot_attempt_at[device_id] = tick_at
+
+            if STOP.is_set() or self.periodic_stop.is_set():
+                break
+
             LOGGER.info(
-                "Periodic snapshot tick for %s",
+                "Periodic snapshot tick for %s (RAM schedule)",
                 self.devices[device_id]["name"],
             )
             self._submit_media(device_id, "periodic", None)
-            if self.periodic_stop.wait(interval) or STOP.is_set():
-                break
 
     def _submit_media(self, device_id: str, kind: str, generation: int | None) -> None:
         """Submit a capture without letting shutdown races kill timer threads."""
@@ -405,6 +438,10 @@ class Bridge:
             with self.snapshot_lock:
                 if self.media_generation.get(device_id) != generation:
                     return
+
+        # Motion, pressed and periodic captures all reset the same RAM-only
+        # interval. No file existence or mtime is read here.
+        self._remember_snapshot_attempt(device_id)
         try:
             urls = self.camera_client.urls(camera_entity)
             jpeg = self.camera_client.capture(camera_entity)
