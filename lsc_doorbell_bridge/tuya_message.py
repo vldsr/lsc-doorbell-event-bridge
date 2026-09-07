@@ -128,8 +128,9 @@ def parse_message(
                 else:
                     awake = bool(value)
                 events.append(ParsedEvent("awake", code, timestamp, raw={"value": awake}))
-            elif code == "initiative_message" or "212" in item:
-                embedded = decode_embedded_message(value if value is not None else item.get("212"))
+            elif code == "initiative_message" or "alarm_message" or "212" in item:
+                message_value = item.get("185") if "185" in item else value if value is not None else item.get("212")
+                embedded = decode_embedded_message(message_value)
                 if not embedded:
                     continue
                 command = str(embedded.get("cmd", "")).lower()
