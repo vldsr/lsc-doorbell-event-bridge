@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.1.1
+
+- Store snapshot archive in Home Assistant `/media/lsc_doorbell/snapshots`.
+- Expose snapshots automatically through Home Assistant built-in Media Source.
+- Migrate existing snapshots from `/media/lsc_doorbell/snapshots` on first start after upgrade.
+- Add `media_source` URI to `/api/snapshots` response.
+
+
 ## 1.0.0
 
 - All normal configuration moved to the Ingress Web UI.

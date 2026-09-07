@@ -1,4 +1,4 @@
-# LSC Doorbell Event Bridge 1.0.0
+# LSC Doorbell Event Bridge 1.1.1
 
 Open the Web UI to configure the Tuya credentials, doorbell, Home Assistant camera, snapshot triggers and photo retention.
 

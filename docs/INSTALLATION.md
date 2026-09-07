@@ -1,6 +1,6 @@
 # Complete installation and configuration guide
 
-This guide explains how to install and configure **LSC Doorbell Event Bridge 1.0.0** from start to finish.
+This guide explains how to install and configure **LSC Doorbell Event Bridge 1.1.1** from start to finish.
 
 The setup has two parts:
 

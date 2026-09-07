@@ -23,7 +23,7 @@ RUN python -m pip install --upgrade pip \
     && python -m pip install -r /tmp/requirements.txt
 
 WORKDIR /app
-COPY app.py tuya_message.py ha_camera.py config_ui.py /app/
+COPY app.py tuya_message.py ha_camera.py config_ui.py storage.py /app/
 COPY run.sh /run.sh
 RUN chmod 0755 /run.sh
 

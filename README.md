@@ -16,6 +16,23 @@ For wired doorbells or devices that can be accessed reliably over the local netw
 - Persistent photo archive with multi-select download and deletion.
 - Camera and Device ID suggestions from Home Assistant, where available.
 - No YAML editing required for normal configuration.
+- Snapshots are stored in Home Assistant's `/media/lsc_doorbell/snapshots` directory.
+- Snapshots are automatically available through Home Assistant's built-in Media Source.
+- The snapshot API also returns a ready-to-use `media-source://` URI.
+
+## Media Source
+
+The App stores the snapshot archive in Home Assistant's `/media` directory. Home Assistant's built-in Media Source automatically exposes this directory in **Media > My media**, so no custom Media Source integration or additional YAML configuration is required.
+
+The archive root is:
+
+```text
+media-source://media_source/local/lsc_doorbell/snapshots
+```
+
+Snapshots are grouped by doorbell/device. The `/api/snapshots` response includes a `media_source` field for every snapshot with its corresponding URI.
+
+When upgrading from an older version that stored snapshots under `/media/lsc_doorbell/snapshots`, the App automatically migrates existing JPEG files to `/media/lsc_doorbell/snapshots`.
 
 ## Installation
 

@@ -1,3 +1,4 @@
+from .storage import SNAPSHOT_ROOT
 """LSC Doorbell Event Bridge Home Assistant App."""
 
 from __future__ import annotations
@@ -22,7 +23,6 @@ from ha_camera import CameraError, HomeAssistantCameraClient
 from tuya_message import ParsedEvent, build_authentication, decrypt_envelope, parse_message
 
 OPTIONS_PATH = Path("/data/options.json")
-SNAPSHOT_ROOT = Path("/data/snapshots")
 SUPERVISOR_URL = "http://supervisor"
 PULSAR_ENDPOINTS = {
     "china": "pulsar+ssl://mqe.tuyacn.com:7285/",
@@ -294,7 +294,7 @@ class Bridge:
         self.snapshot_lock = threading.Lock()
         self.periodic_stop = threading.Event()
         # The periodic schedule is tracked only in RAM with a monotonic clock.
-        # Snapshot files under /data/snapshots are archive items only: deleting
+        # Snapshot files under /media/lsc_doorbell/snapshots are archive items only: deleting
         # the newest file (or the whole archive) cannot alter this state.
         self.periodic_state = threading.Condition()
         self.periodic_interval = max(60.0, self.snapshot_refresh_minutes * 60.0)
