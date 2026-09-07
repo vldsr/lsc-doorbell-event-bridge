@@ -1,5 +1,6 @@
-from .storage import SNAPSHOT_ROOT
 """LSC Doorbell Event Bridge Home Assistant App."""
+
+from .storage import SNAPSHOT_ROOT
 
 from __future__ import annotations
 
