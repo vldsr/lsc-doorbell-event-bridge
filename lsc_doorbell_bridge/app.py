@@ -17,11 +17,15 @@ import paho.mqtt.client as mqtt
 import pulsar
 import requests
 
-from .storage import SNAPSHOT_ROOT
-
 from config_ui import ConfigurationService
 from ha_camera import CameraError, HomeAssistantCameraClient
-from tuya_message import ParsedEvent, build_authentication, decrypt_envelope, parse_message
+from storage import SNAPSHOT_ROOT
+from tuya_message import (
+    ParsedEvent,
+    build_authentication,
+    decrypt_envelope,
+    parse_message,
+)
 
 OPTIONS_PATH = Path("/data/options.json")
 SUPERVISOR_URL = "http://supervisor"
