@@ -20,12 +20,8 @@ import requests
 from config_ui import ConfigurationService
 from ha_camera import CameraError, HomeAssistantCameraClient
 from storage import SNAPSHOT_ROOT
-from tuya_message import (
-    ParsedEvent,
-    build_authentication,
-    decrypt_envelope,
-    parse_message,
-)
+from tuya_client import TuyaCloudClient
+from tuya_message import ParsedEvent, build_authentication, decrypt_envelope, parse_message
 
 OPTIONS_PATH = Path("/data/options.json")
 SUPERVISOR_URL = "http://supervisor"
@@ -293,6 +289,12 @@ class Bridge:
 
         self.camera_client = camera_client
         self.camera_client.timeout = self.snapshot_timeout
+        self.tuya_client = TuyaCloudClient(
+            access_id=self.access_id,
+            access_secret=self.access_secret,
+            endpoint=self._cloud_api_endpoint(),
+            timeout=self.snapshot_timeout,
+        )
         self.mqtt = MqttPublisher(self.devices)
         self.snapshot_executor = ThreadPoolExecutor(max_workers=max(1, min(4, len(self.devices))))
         self.snapshot_timers: dict[str, threading.Timer] = {}
@@ -328,6 +330,7 @@ class Bridge:
             for device_id in self.devices:
                 self.media_generation[device_id] = self.media_generation.get(device_id, 0) + 1
         self.snapshot_executor.shutdown(wait=False, cancel_futures=True)
+        self.tuya_client.close()
         self.mqtt.close()
 
     def _start_periodic_refresh(self) -> None:
@@ -476,6 +479,52 @@ class Bridge:
         except Exception:
             LOGGER.exception("Unexpected snapshot error for %s", self.devices[device_id]["name"])
 
+    def _cloud_api_endpoint(self) -> str:
+        endpoints = {
+            "china": "https://openapi.tuyacn.com",
+            "america": "https://openapi.tuyaus.com",
+            "central_europe": "https://openapi.tuyaeu.com",
+            "india": "https://openapi.tuyain.com",
+        }
+        return endpoints[self.data_center]
+
+    def _submit_tuya_media(self, device_id: str, kind: str, media: dict[str, Any]) -> None:
+        try:
+            self.snapshot_executor.submit(self._download_tuya_media, device_id, kind, media)
+        except RuntimeError:
+            LOGGER.debug(
+                "Ignoring %s Tuya media request for %s while the executor is shutting down",
+                kind,
+                self.devices[device_id]["name"],
+            )
+
+    def _download_tuya_media(self, device_id: str, kind: str, media: dict[str, Any]) -> None:
+        self._remember_snapshot_attempt(device_id)
+        try:
+            jpeg = self.tuya_client.download_media(device_id, media)
+            stored = self._store_snapshot(device_id, jpeg, kind)
+            self.mqtt.publish_snapshot(
+                device_id,
+                jpeg,
+                source_camera=self.devices[device_id]["camera_entity"],
+                source_event=kind,
+                stream_url=None,
+            )
+            LOGGER.info(
+                "Published %s-byte Tuya cloud snapshot for %s after %s event",
+                len(jpeg),
+                self.devices[device_id]["name"],
+                kind,
+            )
+            LOGGER.debug("Stored Tuya cloud snapshot at %s", stored)
+        except Exception as error:
+            LOGGER.warning(
+                "Tuya cloud media download failed for %s: %s; falling back to Home Assistant camera",
+                self.devices[device_id]["name"],
+                error,
+            )
+            self._schedule_media(device_id, kind)
+
     def _handle_event(self, device_id: str, event: ParsedEvent) -> None:
         if event.kind == "battery":
             value = event.raw.get("value") if event.raw else "unknown"
@@ -497,7 +546,10 @@ class Bridge:
         self.mqtt.pulse(device_id, key, self.event_hold)
         should_capture = (event.kind == "doorbell" and self.snapshot_on_press) or (event.kind == "motion" and self.snapshot_on_motion)
         if should_capture:
-            self._schedule_media(device_id, key)
+            if event.media:
+                self._submit_tuya_media(device_id, key, event.media)
+            else:
+                self._schedule_media(device_id, key)
         LOGGER.info("%s event from %s", key, self.devices[device_id]["name"])
 
     def run(self) -> None:
