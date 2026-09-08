@@ -1,0 +1,4 @@
+/.venv/
+/lsc_doorbell_bridge/__pycache__/
+/lsc_doorbell_bridge/doorbell.jpg
+/lsc_doorbell_bridge/test_tuya_media.py
