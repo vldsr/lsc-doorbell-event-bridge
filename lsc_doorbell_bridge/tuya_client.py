@@ -24,17 +24,18 @@ class TuyaCloudError(RuntimeError):
 class TuyaCloudClient:
     """Download and decrypt IPC media referenced by Tuya event messages.
 
-    The IPC movement-configs API returns a temporary signed URL for a resource.
-    The downloaded object is a Tuya container, not a raw JPEG. Its payload is
-    AES-CBC encrypted with the media resource key supplied in the event.
-    """
+    For Pulsar ``alarm_message`` resources Tuya documents the
+    ``movement-configs`` API as the URL-resolution API.  The Smart Life APK
+    also contains the internal CloudBusiness APIs
+    ``m.ipc.storage.event.timerange.query`` and
+    ``thing.m.ipc.storage.secret.get``; those belong to the Smart App SDK
+    session and are not interchangeable with the project OpenAPI credentials
+    used by this bridge.
 
-    _DIRECT_STORAGE_HOSTS = {
-        "china": "https://ty-cn-storage30.s3.cn-north-1.amazonaws.com.cn",
-        "america": "https://ty-us-storage30.s3.us-east-1.amazonaws.com",
-        "central_europe": "https://ty-eu-storage30.s3.eu-central-1.amazonaws.com",
-        "india": "https://ty-in-storage30.s3.ap-south-1.amazonaws.com",
-    }
+    The object returned by ``movement-configs`` is a Tuya encrypted container,
+    not a raw JPEG. Its payload is AES-CBC encrypted with the resource key
+    supplied in the Pulsar media reference.
+    """
 
     def __init__(self, access_id: str, access_secret: str, endpoint: str, timeout: float = 20) -> None:
         self.access_id = access_id
@@ -66,28 +67,48 @@ class TuyaCloudClient:
             container = self._download(url)
             return self._decrypt_container(container, resource_id)
         except Exception as error:
-            errors.append(f"Cloud API: {error}")
+            errors.append(f"movement-configs: {error}")
             LOGGER.debug("Tuya Cloud media URL failed: %s", error)
 
-        try:
-            url = self._direct_storage_url(bucket, path)
-            LOGGER.debug("Trying direct Tuya storage URL: %s", url)
-            container = self._download(url)
-            return self._decrypt_container(container, resource_id)
-        except Exception as error:
-            errors.append(f"direct storage: {error}")
-            raise TuyaCloudError("; ".join(errors)) from error
+        # Do not try to construct an S3 URL here. Tuya storage objects are
+        # private and a bare bucket/object URL normally returns HTTP 403.
+        # A signed URL must be returned by a Tuya API.
+        raise TuyaCloudError(
+            "; ".join(errors)
+            + "; direct S3 access is not supported because the Tuya storage object is private"
+        )
 
     def _get_biz_url(self, device_id: str, bucket: str, path: str) -> str:
+        """Resolve a Pulsar bucket/path to a temporary signed URL.
+
+        Tuya's support documentation explicitly points to this API for
+        ``movement_detect_pic`` resources and notes that a subscription may be
+        required.  The response can be either a string or an object containing
+        a URL field, depending on the API version.
+        """
         query = f"?bucket={quote(bucket, safe='')}&file_path={quote(path, safe='/')}"
-        body = self._request("GET", f"/v1.0/devices/{quote(device_id, safe='')}/movement-configs{query}")
+        api_path = (
+            f"/v1.0/devices/{quote(device_id, safe='')}"
+            f"/movement-configs{query}"
+        )
+        body = self._request("GET", api_path)
         if not body.get("success"):
-            raise TuyaCloudError(str(body.get("msg") or body))
+            message = str(body.get("msg") or body)
+            print(f"ERROR MESSAGE: {message}")
+            if "not subscribed" in message.lower() or "no permissions" in message.lower():
+                raise TuyaCloudError(
+                    "Tuya movement-configs API is not subscribed for this project. "
+                    "Tuya documents this API as the URL resolver for movement_detect_pic; "
+                    "request the API subscription in Tuya IoT Platform/support. "
+                    f"Response: {message}"
+                )
+            raise TuyaCloudError(message)
         result = body.get("result")
+
         if isinstance(result, str) and result:
             return result
         if isinstance(result, dict):
-            for key in ("bizUrl", "url", "fileUrl"):
+            for key in ("bizUrl", "url", "fileUrl", "snapshotUrl"):
                 value = result.get(key)
                 if isinstance(value, str) and value:
                     return value
@@ -164,22 +185,6 @@ class TuyaCloudClient:
         if not response.content:
             raise TuyaCloudError("Tuya storage returned an empty response")
         return response.content
-
-    def _direct_storage_url(self, bucket: str, path: str) -> str:
-        # Tuya event buckets are normally named like ty-eu-storage30-pic.
-        # Convert the bucket name to the corresponding S3 host.
-        bucket_name = bucket.replace("-pic", "")
-        if bucket_name.startswith("ty-eu-"):
-            host = "https://ty-eu-storage30.s3.eu-central-1.amazonaws.com"
-        elif bucket_name.startswith("ty-us-"):
-            host = "https://ty-us-storage30.s3.us-east-1.amazonaws.com"
-        elif bucket_name.startswith("ty-cn-"):
-            host = "https://ty-cn-storage30.s3.cn-north-1.amazonaws.com.cn"
-        elif bucket_name.startswith("ty-in-"):
-            host = "https://ty-in-storage30.s3.ap-south-1.amazonaws.com"
-        else:
-            raise TuyaCloudError(f"Unsupported Tuya storage bucket: {bucket}")
-        return host + "/" + path.lstrip("/")
 
     @staticmethod
     def _decrypt_container(container: bytes, resource_id: str) -> bytes:

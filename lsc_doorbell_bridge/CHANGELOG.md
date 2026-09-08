@@ -1,3 +1,9 @@
+## 1.2.1
+- Keep Tuya Pulsar media resolution on the documented `movement-configs` API.
+- Remove the invalid unsigned S3 fallback (private Tuya storage returns 403).
+- Improve diagnostics for an unsubscribed `movement-configs` API.
+- Document that Smart Life `m.ipc.storage.event.timerange.query` / `thing.m.ipc.storage.secret.get` are Smart App SDK session APIs, not direct replacements for project OpenAPI credentials.
+
 # Changelog
 
 ## 1.1.1
