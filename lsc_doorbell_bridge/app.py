@@ -518,12 +518,12 @@ class Bridge:
             )
             LOGGER.debug("Stored Tuya cloud snapshot at %s", stored)
         except Exception as error:
-            LOGGER.warning(
-                "Tuya cloud media download failed for %s: %s; falling back to Home Assistant camera",
+            LOGGER.error(
+                "Tuya cloud media download failed for %s after %s event: %s",
                 self.devices[device_id]["name"],
+                kind,
                 error,
             )
-            self._schedule_media(device_id, kind)
 
     def _handle_event(self, device_id: str, event: ParsedEvent) -> None:
         if event.kind == "battery":

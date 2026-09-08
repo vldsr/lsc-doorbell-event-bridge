@@ -1,3 +1,13 @@
+# Changelog
+
+## 1.2.2
+
+- Download Tuya IPC snapshots from the `movement-configs` URL resolver when an event contains media metadata.
+- Publish Tuya cloud snapshots through the existing MQTT snapshot pipeline.
+- Do not fall back to a Home Assistant camera snapshot when a Tuya cloud download fails.
+- Add explicit logging for encrypted download and decrypted JPEG sizes.
+- Include `tuya_client.py` in the Docker image to fix `ModuleNotFoundError: No module named 'tuya_client'`.
+
 ## 1.2.1
 - Keep Tuya Pulsar media resolution on the documented `movement-configs` API.
 - Remove the invalid unsigned S3 fallback (private Tuya storage returns 403).

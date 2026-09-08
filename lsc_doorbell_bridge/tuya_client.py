@@ -52,7 +52,8 @@ class TuyaCloudClient:
     def download_media(self, device_id: str, media: dict[str, Any]) -> bytes:
         """Get the media URL through Cloud API, then download/decrypt the file.
 
-        The direct storage URL is only used when the Cloud API call fails.
+        Direct object-storage access is intentionally not attempted: Tuya media
+        objects are private and require a URL resolved by Tuya Cloud.
         """
         bucket = str(media.get("bucket") or "").strip()
         path = str(media.get("path") or "").strip()
@@ -65,7 +66,10 @@ class TuyaCloudClient:
             url = self._get_biz_url(device_id, bucket, path)
             LOGGER.debug("Tuya Cloud returned media URL for %s", device_id)
             container = self._download(url)
-            return self._decrypt_container(container, resource_id)
+            LOGGER.info("Downloaded %d bytes of encrypted Tuya media for %s", len(container), device_id)
+            jpeg = self._decrypt_container(container, resource_id)
+            LOGGER.info("Decrypted Tuya media to %d-byte JPEG for %s", len(jpeg), device_id)
+            return jpeg
         except Exception as error:
             errors.append(f"movement-configs: {error}")
             LOGGER.debug("Tuya Cloud media URL failed: %s", error)
@@ -94,7 +98,6 @@ class TuyaCloudClient:
         body = self._request("GET", api_path)
         if not body.get("success"):
             message = str(body.get("msg") or body)
-            print(f"ERROR MESSAGE: {message}")
             if "not subscribed" in message.lower() or "no permissions" in message.lower():
                 raise TuyaCloudError(
                     "Tuya movement-configs API is not subscribed for this project. "
@@ -104,7 +107,6 @@ class TuyaCloudClient:
                 )
             raise TuyaCloudError(message)
         result = body.get("result")
-
         if isinstance(result, str) and result:
             return result
         if isinstance(result, dict):
