@@ -62,18 +62,21 @@ class TuyaCloudClient:
             raise TuyaCloudError(f"Incomplete media reference: {media!r}")
 
         errors: list[str] = []
-        try:
-            url = self._get_biz_url(device_id, bucket, path)
-            LOGGER.debug("Tuya Cloud returned media URL for %s", device_id)
-            container = self._download(url)
-            LOGGER.info("Downloaded %d bytes of encrypted Tuya media for %s", len(container), device_id)
-            jpeg = self._decrypt_container(container, resource_id)
-            LOGGER.info("Decrypted Tuya media to %d-byte JPEG for %s", len(jpeg), device_id)
-            return jpeg
-        except Exception as error:
-            errors.append(f"movement-configs: {error}")
-            LOGGER.debug("Tuya Cloud media URL failed: %s", error)
-
+        for attempt in range(3):
+            try:
+                url = self._get_biz_url(device_id, bucket, path)
+                LOGGER.debug("Tuya Cloud returned media URL for %s", device_id)
+                container = self._download(url)
+                LOGGER.info("Downloaded %d bytes of encrypted Tuya media for %s", len(container), device_id)
+                jpeg = self._decrypt_container(container, resource_id)
+                LOGGER.info("Decrypted Tuya media to %d-byte JPEG for %s", len(jpeg), device_id)
+                return jpeg
+            except Exception as error:
+                errors.append(f"movement-configs: {error}")
+                LOGGER.debug("Tuya Cloud media URL failed: %s", error)
+                LOGGER.warning("Attempt %d/3 failed for Tuya media %s: %s",attempt + 1,device_id,error)
+            if attempt < 2:
+                time.sleep(1)
         # Do not try to construct an S3 URL here. Tuya storage objects are
         # private and a bare bucket/object URL normally returns HTTP 403.
         # A signed URL must be returned by a Tuya API.
